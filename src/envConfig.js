@@ -6,6 +6,7 @@ const env = {
   accessTokenExpiry: process.env.ACCESS_TOKEN_EXPIRY,
   refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET,
   refreshTokenExpiry: process.env.REFRESH_TOKEN_EXPIRY,
+  origin: process.env.ORIGIN,
 };
 
 export default env;

@@ -62,7 +62,10 @@ const userRegister = asyncHandler(async (req, res) => {
   });
 
   // Verify if user created.
-  const user = await User.findById(newUser._id, "-password -refreshToken");
+  const user = await User.findById(
+    newUser._id,
+    "-password -refreshToken -resetPasswordToken -resetPasswordTokenExpiry",
+  );
 
   return res
     .status(201)
@@ -123,6 +126,8 @@ const userLogin = asyncHandler(async (req, res) => {
       lean: true,
       new: true,
     },
+  ).select(
+    "-password -refreshToken -resetPasswordToken -resetPasswordTokenExpiry",
   );
 
   return res
@@ -130,7 +135,11 @@ const userLogin = asyncHandler(async (req, res) => {
     .cookie("accessToken", accessToken, cookieOptions)
     .cookie("refreshToken", refreshToken, cookieOptions)
     .json(
-      new APIResponse(200, "Login success.", { ...updatedUser, accessToken }),
+      new APIResponse(200, "Login success.", {
+        ...updatedUser,
+        refreshToken,
+        accessToken,
+      }),
     );
 });
 
@@ -152,7 +161,9 @@ const getUser = asyncHandler(async (req, res) => {
   const userId = req?.user?._id;
 
   // Find user with id.
-  const user = await User.findById(userId).select("-password -refreshToken");
+  const user = await User.findById(userId).select(
+    "-password -refreshToken -resetPasswordToken -resetPasswordTokenExpiry",
+  );
 
   if (!user) {
     return res.status(404).json(new APIErrorResponse(404, "User not found."));
@@ -187,7 +198,9 @@ const updateUserFullName = asyncHandler(async (req, res) => {
       lean: true,
       new: true,
     },
-  ).select("-password -refreshToken");
+  ).select(
+    "-password -refreshToken -resetPasswordToken -resetPasswordTokenExpiry",
+  );
 
   return res
     .status(200)
@@ -247,7 +260,7 @@ const deleteUserAccount = asyncHandler(async (req, res) => {
   const userId = req?.user?._id;
 
   // Get the password form user for confirmation.
-  const { password } = user.body;
+  const { password } = req.body;
 
   // Validate password field.
   if (!password || password?.toString()?.trim() === "") {
@@ -377,7 +390,6 @@ const forgotPassword = asyncHandler(async (req, res) => {
   const resetPasswordLink = `${env.origin}/resetPassword/${uniqueId}`;
 
   // TODO: send resetPasswordLink via email.
-  console.log(resetPasswordLink);
 
   return res.status(200).json(
     new APIResponse(200, "Password reset link is shared via email.", {
@@ -390,7 +402,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 const resetPassword = asyncHandler(async (req, res) => {
   //Get the reset token from url.
   const { resetPasswordToken } = req.params;
-  const newPassowrd = req.body;
+  const { newPassowrd } = req.body;
 
   // Validate new password.
   if (!passwordRegex.test(newPassowrd)) {
@@ -422,7 +434,7 @@ const resetPassword = asyncHandler(async (req, res) => {
   user.resetPasswordTokenExpiry = 0;
   await user.save();
 
-  res
+  return res
     .status(200)
     .json(
       new APIResponse(200, "Password reset successfully.", { success: true }),

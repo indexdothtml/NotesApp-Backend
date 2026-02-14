@@ -7,6 +7,7 @@ import APIResponse from "../utils/apiResponse.utils.js";
 import sendEmail from "../utils/sendEmail.utils.js";
 import { emailRegex, passwordRegex, cookieOptions } from "../constant.js";
 import { User } from "../models/user.models.js";
+import { Note } from "../models/note.models.js";
 import env from "../envConfig.js";
 
 // User registeration.
@@ -296,7 +297,8 @@ const deleteUserAccount = asyncHandler(async (req, res) => {
       );
   }
 
-  // TODO: Delete other data releated to user like notes.
+  // Delete other data releated to user like notes.
+  await Note.deleteMany({ owner: user._id });
   // TODO: Send email to user.
 
   return res

@@ -16,10 +16,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes middlewares
-import userRoute from "./routes/user.routes.js";
+import userRouter from "./routes/user.routes.js";
+import noteRouter from "./routes/note.routes.js";
 
 // User route
-app.use("/api/v1/user", userRoute);
+app.use("/api/v1/user", userRouter);
+
+// Note route
+app.use("/api/v1/note", noteRouter);
 
 // App error handler middleware
 app.use(appError);

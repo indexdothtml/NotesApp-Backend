@@ -50,4 +50,85 @@ const getAllUserNotes = asyncHandler(async (req, res) => {
     );
 });
 
-export { addNewNote, getAllUserNotes };
+// Delete note.
+const deleteNote = asyncHandler(async (req, res) => {
+  // Get the note id.
+  const { noteId } = req.body;
+
+  // Validate note id.
+  if (!noteId) {
+    return res
+      .status(400)
+      .json(new APIErrorResponse(400, "Note id is required."));
+  }
+
+  // Delete note.
+  const deletedResponse = await Note.findByIdAndDelete(noteId);
+
+  if (!deletedResponse) {
+    return res
+      .status(404)
+      .json(
+        new APIErrorResponse(
+          404,
+          "Note not found, it might be already deleted.",
+        ),
+      );
+  }
+
+  return res
+    .status(200)
+    .json(new APIResponse(200, "Note is deleted.", deletedResponse));
+});
+
+// Update note.
+const updateNote = asyncHandler(async (req, res) => {
+  // Get new title and content.
+  const { noteId, newTitle, newContent } = req.body;
+
+  // Validate note id.
+  if (!noteId) {
+    return res
+      .status(400)
+      .json(new APIErrorResponse(400, "Note id is required."));
+  }
+
+  // Validate title or content.
+  if (
+    !(newTitle || newContent) ||
+    newTitle?.toString()?.trim() === "" ||
+    newContent?.toString()?.trim() === ""
+  ) {
+    return res
+      .status(400)
+      .json(new APIErrorResponse(400, "Title or Content is required."));
+  }
+
+  // Create update object.
+  const updateData = {};
+
+  // Update title if new title is available.
+  if (newTitle && newTitle?.toString()?.trim() !== "") {
+    updateData.title = newTitle;
+  }
+
+  // Update content if new content is available.
+  if (newContent && newContent?.toString()?.trim() !== "") {
+    updateData.content = newContent;
+  }
+
+  // Update title if provided.
+  const updatedNote = await Note.findByIdAndUpdate(
+    noteId,
+    {
+      $set: updateData,
+    },
+    { lean: true, new: true },
+  );
+
+  return res
+    .status(200)
+    .json(new APIResponse(200, "Note is updated.", updatedNote));
+});
+
+export { addNewNote, getAllUserNotes, deleteNote, updateNote };

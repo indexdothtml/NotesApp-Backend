@@ -4,6 +4,7 @@ import { v4 as uuidV4 } from "uuid";
 import asyncHandler from "../utils/asyncHandler.utils.js";
 import APIErrorResponse from "../utils/apiErrorResponse.utils.js";
 import APIResponse from "../utils/apiResponse.utils.js";
+import sendEmail from "../utils/sendEmail.utils.js";
 import { emailRegex, passwordRegex, cookieOptions } from "../constant.js";
 import { User } from "../models/user.models.js";
 import env from "../envConfig.js";
@@ -390,6 +391,19 @@ const forgotPassword = asyncHandler(async (req, res) => {
   const resetPasswordLink = `${env.origin}/resetPassword/${uniqueId}`;
 
   // TODO: send resetPasswordLink via email.
+  const sendEmailResponse = await sendEmail(
+    "abhi.kshirsagar1100@gmail.com",
+    "Reset password",
+    `If you have reqested to reset your password then click on the below link\n Link - ${resetPasswordLink}`,
+  );
+
+  if (!sendEmailResponse) {
+    return res
+      .status(500)
+      .json(
+        new APIErrorResponse(500, "Failed to send email, please try again."),
+      );
+  }
 
   return res.status(200).json(
     new APIResponse(200, "Password reset link is shared via email.", {

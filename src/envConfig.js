@@ -7,6 +7,9 @@ const env = {
   refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET,
   refreshTokenExpiry: process.env.REFRESH_TOKEN_EXPIRY,
   origin: process.env.ORIGIN,
+  senderEmailAddress: process.env.SENDER_EMAIL_ADDRESS,
+  senderEmailPassword: process.env.SENDER_EMAIL_PASSWORD,
+  senderEmailService: process.env.SENDER_EMAIL_SERVICE,
 };
 
 export default env;

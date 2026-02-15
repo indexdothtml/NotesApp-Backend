@@ -12,15 +12,22 @@ import {
   forgotPassword,
   resetPassword,
 } from "../controllers/user.controllers.js";
+import {
+  userRegisterValidationSchema,
+  userLoginValidationSchema,
+} from "../validations/user.validations.js";
 import verifyAuth from "../middlewares/auth.middlewares.js";
+import validate from "../middlewares/validate.middlewares.js";
 
 const userRouter = Router();
 
 // User registeration.
-userRouter.route("/register").post(userRegister);
+userRouter
+  .route("/register")
+  .post(validate(userRegisterValidationSchema), userRegister);
 
 // User login.
-userRouter.route("/login").post(userLogin);
+userRouter.route("/login").post(validate(userLoginValidationSchema), userLogin);
 
 // User logout.
 userRouter.route("/logout").get(verifyAuth, userLogout);

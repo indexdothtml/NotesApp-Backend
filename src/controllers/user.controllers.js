@@ -14,36 +14,6 @@ import env from "../envConfig.js";
 const userRegister = asyncHandler(async (req, res) => {
   const { fullName, email, username, password } = req.body;
 
-  // Validate fields.
-  if (
-    [fullName, email, username, password].some(
-      (field) => !field || field.toString().trim() === "",
-    )
-  ) {
-    return res
-      .status(400)
-      .json(new APIErrorResponse(400, "All fields are required."));
-  }
-
-  // Validate email rule.
-  if (!emailRegex.test(email)) {
-    return res
-      .status(400)
-      .json(new APIErrorResponse(400, "Expected valid email address."));
-  }
-
-  // Validate password rule.
-  if (!passwordRegex.test(password)) {
-    return res
-      .status(400)
-      .json(
-        new APIErrorResponse(
-          400,
-          "Expected strong password with numbers, small character, capital character, special character.",
-        ),
-      );
-  }
-
   // Check if user with given fields already exists.
   const userExist = await User.findOne({ $or: [{ username }, { email }] });
 
@@ -77,18 +47,6 @@ const userRegister = asyncHandler(async (req, res) => {
 // User login.
 const userLogin = asyncHandler(async (req, res) => {
   const { username, email, password } = req.body;
-
-  // Validate fields.
-  if (!(username || email) || !password) {
-    return res
-      .status(400)
-      .json(
-        new APIErrorResponse(
-          400,
-          "Username or Email and Password are required fields.",
-        ),
-      );
-  }
 
   // Find the user with username or password.
   const user = await User.findOne({

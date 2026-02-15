@@ -6,6 +6,7 @@ import {
   getAllUserNotes,
   deleteNote,
   updateNote,
+  getNote,
 } from "../controllers/note.controllers.js";
 
 const noteRouter = Router();
@@ -21,5 +22,8 @@ noteRouter.route("/deleteNote").post(verifyAuth, deleteNote);
 
 // Update note.
 noteRouter.route("/updateNote").post(verifyAuth, updateNote);
+
+// Get note.
+noteRouter.route("/getNote").post(verifyAuth, getNote);
 
 export default noteRouter;

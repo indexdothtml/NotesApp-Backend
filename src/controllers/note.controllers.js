@@ -131,4 +131,27 @@ const updateNote = asyncHandler(async (req, res) => {
     .json(new APIResponse(200, "Note is updated.", updatedNote));
 });
 
-export { addNewNote, getAllUserNotes, deleteNote, updateNote };
+// Get single note.
+const getNote = asyncHandler(async (req, res) => {
+  // Get the note id from user.
+  const { noteId } = req.body;
+
+  if (!noteId) {
+    return res
+      .status(400)
+      .json(new APIErrorResponse(400, "Note id is required."));
+  }
+
+  // Get the note.
+  const note = await Note.findById(noteId);
+
+  if (!note) {
+    return res.status(404).json(new APIErrorResponse(404, "Note not found."));
+  }
+
+  return res
+    .status(200)
+    .json(new APIResponse(200, "Fetched note successfully.", note));
+});
+
+export { addNewNote, getAllUserNotes, deleteNote, updateNote, getNote };

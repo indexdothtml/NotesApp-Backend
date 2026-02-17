@@ -7,15 +7,6 @@ import { Note } from "../models/note.models.js";
 const addNewNote = asyncHandler(async (req, res) => {
   const { title, content } = req.body;
 
-  // Validate fields.
-  if (
-    [title, content].some((field) => !field || field.toString().trim() === "")
-  ) {
-    return res
-      .status(400)
-      .json(new APIErrorResponse(400, "Title and Content are required."));
-  }
-
   // Get user id of authenticated user.
   const userId = req?.user?._id;
 
@@ -55,13 +46,6 @@ const deleteNote = asyncHandler(async (req, res) => {
   // Get the note id.
   const { noteId } = req.body;
 
-  // Validate note id.
-  if (!noteId) {
-    return res
-      .status(400)
-      .json(new APIErrorResponse(400, "Note id is required."));
-  }
-
   // Delete note.
   const deletedResponse = await Note.findByIdAndDelete(noteId);
 
@@ -85,24 +69,6 @@ const deleteNote = asyncHandler(async (req, res) => {
 const updateNote = asyncHandler(async (req, res) => {
   // Get new title and content.
   const { noteId, newTitle, newContent } = req.body;
-
-  // Validate note id.
-  if (!noteId) {
-    return res
-      .status(400)
-      .json(new APIErrorResponse(400, "Note id is required."));
-  }
-
-  // Validate title or content.
-  if (
-    !(newTitle || newContent) ||
-    newTitle?.toString()?.trim() === "" ||
-    newContent?.toString()?.trim() === ""
-  ) {
-    return res
-      .status(400)
-      .json(new APIErrorResponse(400, "Title or Content is required."));
-  }
 
   // Create update object.
   const updateData = {};
@@ -135,12 +101,6 @@ const updateNote = asyncHandler(async (req, res) => {
 const getNote = asyncHandler(async (req, res) => {
   // Get the note id from user.
   const { noteId } = req.body;
-
-  if (!noteId) {
-    return res
-      .status(400)
-      .json(new APIErrorResponse(400, "Note id is required."));
-  }
 
   // Get the note.
   const note = await Note.findById(noteId);

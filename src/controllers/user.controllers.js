@@ -5,7 +5,7 @@ import asyncHandler from "../utils/asyncHandler.utils.js";
 import APIErrorResponse from "../utils/apiErrorResponse.utils.js";
 import APIResponse from "../utils/apiResponse.utils.js";
 import sendEmail from "../utils/sendEmail.utils.js";
-import { emailRegex, passwordRegex, cookieOptions } from "../constant.js";
+import { cookieOptions } from "../constant.js";
 import { User } from "../models/user.models.js";
 import { Note } from "../models/note.models.js";
 import env from "../envConfig.js";
@@ -138,13 +138,6 @@ const getUser = asyncHandler(async (req, res) => {
 const updateUserFullName = asyncHandler(async (req, res) => {
   const { fullName } = req.body;
 
-  // Validate fullName field.
-  if (!fullName || fullName?.toString()?.trim() === "") {
-    return res
-      .status(400)
-      .json(new APIErrorResponse(400, "Field is required."));
-  }
-
   // Get user id.
   const userId = req?.user?._id;
 
@@ -170,18 +163,6 @@ const updateUserFullName = asyncHandler(async (req, res) => {
 // Update user password.
 const updateUserPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
-
-  // Validate password.
-  if (!passwordRegex.test(newPassword)) {
-    return res
-      .status(400)
-      .json(
-        new APIErrorResponse(
-          400,
-          "Expected strong password with numbers, small character, capital character, special character.",
-        ),
-      );
-  }
 
   // Get User id.
   const userId = req?.user?._id;
@@ -221,13 +202,6 @@ const deleteUserAccount = asyncHandler(async (req, res) => {
 
   // Get the password form user for confirmation.
   const { password } = req.body;
-
-  // Validate password field.
-  if (!password || password?.toString()?.trim() === "") {
-    return res
-      .status(400)
-      .json(new APIErrorResponse(400, "Field is required."));
-  }
 
   // Find user.
   const user = await User.findById(userId);
@@ -322,13 +296,6 @@ const getNewAccessToken = asyncHandler(async (req, res) => {
 const forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
 
-  // Verify email.
-  if (!email || email?.toString()?.trim() === "") {
-    return res
-      .status(400)
-      .json(new APIErrorResponse(400, "Please provide email address."));
-  }
-
   // Find user.
   const user = await User.findOne({ email });
 
@@ -377,18 +344,6 @@ const resetPassword = asyncHandler(async (req, res) => {
   //Get the reset token from url.
   const { resetPasswordToken } = req.params;
   const { newPassowrd } = req.body;
-
-  // Validate new password.
-  if (!passwordRegex.test(newPassowrd)) {
-    return res
-      .status(400)
-      .json(
-        new APIErrorResponse(
-          400,
-          "Enter strong password containing small case, capital case, numbers and special character.",
-        ),
-      );
-  }
 
   // Find user with reset token and expiry.
   const user = await User.findOne({

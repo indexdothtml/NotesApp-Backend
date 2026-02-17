@@ -15,6 +15,11 @@ import {
 import {
   userRegisterValidationSchema,
   userLoginValidationSchema,
+  updateUserFullNameValidationSchema,
+  updateUserPasswordValidationSchema,
+  deleteUserAccountValidationSchema,
+  forgotPasswordValidationSchema,
+  resetPasswordValidationSchema,
 } from "../validations/user.validations.js";
 import verifyAuth from "../middlewares/auth.middlewares.js";
 import validate from "../middlewares/validate.middlewares.js";
@@ -36,21 +41,43 @@ userRouter.route("/logout").get(verifyAuth, userLogout);
 userRouter.route("/getUserDetails").get(verifyAuth, getUser);
 
 // Update user's fullname
-userRouter.route("/updateFullName").post(verifyAuth, updateUserFullName);
+userRouter
+  .route("/updateFullName")
+  .post(
+    verifyAuth,
+    validate(updateUserFullNameValidationSchema),
+    updateUserFullName,
+  );
 
 // Update user's password
-userRouter.route("/updatePassword").post(verifyAuth, updateUserPassword);
+userRouter
+  .route("/updatePassword")
+  .post(
+    verifyAuth,
+    validate(updateUserPasswordValidationSchema),
+    updateUserPassword,
+  );
 
 // Delete user account.
-userRouter.route("/deleteUserAccount").post(verifyAuth, deleteUserAccount);
+userRouter
+  .route("/deleteUserAccount")
+  .post(
+    verifyAuth,
+    validate(deleteUserAccountValidationSchema),
+    deleteUserAccount,
+  );
 
 // Get new access token.
 userRouter.route("/getNewAccessToken").get(getNewAccessToken);
 
 // Forgot password.
-userRouter.route("/forgotPassword").post(forgotPassword);
+userRouter
+  .route("/forgotPassword")
+  .post(validate(forgotPasswordValidationSchema), forgotPassword);
 
 // Reset new password.
-userRouter.route("/resetPassword/:resetPasswordToken").post(resetPassword);
+userRouter
+  .route("/resetPassword/:resetPasswordToken")
+  .post(validate(resetPasswordValidationSchema), resetPassword);
 
 export default userRouter;

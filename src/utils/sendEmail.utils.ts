@@ -1,8 +1,8 @@
-import transport from "../emailConfig.js";
-import logger from "../loggerConfig.js";
-import env from "../envConfig.js";
+import { transport } from "../emailConfig";
+import { logger } from "../loggerConfig";
+import { env } from "../envConfig";
 
-async function sendEmail(to, subject, body) {
+export async function sendEmail(to: string, subject: string, body: string) {
   try {
     await transport.sendMail({
       from: env.senderEmailAddress,
@@ -16,5 +16,3 @@ async function sendEmail(to, subject, body) {
     return false;
   }
 }
-
-export default sendEmail;

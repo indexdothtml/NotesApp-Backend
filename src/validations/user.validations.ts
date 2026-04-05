@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-import { passwordRegex } from "../constant.js";
+import { passwordRegex } from "../constant";
 
 // Validation schema for user registeration input fields.
 const userRegisterValidationSchema = Joi.object({
@@ -18,15 +18,9 @@ const userRegisterValidationSchema = Joi.object({
 
 // Validation schema for user login input fields.
 const userLoginValidationSchema = Joi.object({
-  username: Joi.string().trim().alphanum().min(3).max(30),
-  email: Joi.string().trim().email(),
+  email: Joi.string().trim().email().required(),
   password: Joi.string().required(),
-})
-  .xor("username", "email")
-  .messages({
-    "object.missing": "Please provide either email or username.",
-    "object.xor": "Please provide either email or username, but not both.",
-  }); // any of the one from username or password is required not both.
+});
 
 // Validation schema for update fullname input field.
 const updateUserFullNameValidationSchema = Joi.object({

@@ -1,9 +1,9 @@
 import winston from "winston";
 
-import env from "./envConfig.js";
+import { env } from "./envConfig";
 
 // Logger configuration
-const logger = winston.createLogger({
+export const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
     winston.format.timestamp(),
@@ -26,5 +26,3 @@ if (env.nodeEnv === "production") {
     new winston.transports.File({ dirname: "./logs", filename: "app.log" }),
   );
 }
-
-export default logger;

@@ -1,4 +1,4 @@
-const env = {
+export const env = {
   dbURI: process.env.DB_URI,
   nodeEnv: process.env.NODE_ENV,
   port: process.env.PORT,
@@ -11,5 +11,3 @@ const env = {
   senderEmailPassword: process.env.SENDER_EMAIL_PASSWORD,
   senderEmailService: process.env.SENDER_EMAIL_SERVICE,
 };
-
-export default env;

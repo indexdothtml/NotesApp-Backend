@@ -1,13 +1,11 @@
 import nodemailer from "nodemailer";
 
-import env from "./envConfig.js";
+import { env } from "./envConfig";
 
-const transport = nodemailer.createTransport({
+export const transport = nodemailer.createTransport({
   service: env.senderEmailService,
   auth: {
     user: env.senderEmailAddress,
     pass: env.senderEmailPassword,
   },
 });
-
-export default transport;

@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 
-import { env } from "./envConfig";
+import { env } from "@/envConfig";
 
 export const transport = nodemailer.createTransport({
   service: env.senderEmailService,

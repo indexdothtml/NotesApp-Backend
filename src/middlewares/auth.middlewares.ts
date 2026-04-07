@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken";
 import type { Response, NextFunction } from "express";
 
-import { APIErrorResponse } from "../utils/apiErrorResponse.utils";
-import { env } from "../envConfig";
-import { logger } from "../loggerConfig";
-import { RequestWithUser, UserData } from "../types/user.types";
+import { APIErrorResponse } from "@/utils/apiErrorResponse.utils";
+import { env } from "@/envConfig";
+import { logger } from "@/loggerConfig";
+import type { RequestWithUser, UserData } from "@/types/user.types";
 
 export function verifyAuth(
   request: RequestWithUser,

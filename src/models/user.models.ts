@@ -3,12 +3,11 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { StringValue } from "ms";
 
-import { env } from "../envConfig";
+import { env } from "@/envConfig";
 
 type User = {
-  fullName: string;
+  name: string;
   email: string;
-  username: string;
   password: string;
   refreshToken: string;
   resetPasswordToken: string;
@@ -25,18 +24,12 @@ type UserDocument = Document & User & UserMethods;
 
 const userSchema = new mongoose.Schema<UserDocument>(
   {
-    fullName: {
+    name: {
       type: String,
       required: true,
       trim: true,
     },
     email: {
-      type: String,
-      required: true,
-      trim: true,
-      unique: true,
-    },
-    username: {
       type: String,
       required: true,
       trim: true,

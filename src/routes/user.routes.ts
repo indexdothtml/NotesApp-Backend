@@ -11,7 +11,7 @@ import {
   // getNewAccessToken,
   // forgotPassword,
   // resetPassword,
-} from "../controllers/user.controllers";
+} from "@/controllers/user.controllers";
 import {
   userRegisterValidationSchema,
   // userLoginValidationSchema,
@@ -20,9 +20,9 @@ import {
   // deleteUserAccountValidationSchema,
   // forgotPasswordValidationSchema,
   // resetPasswordValidationSchema,
-} from "../validations/user.validations";
-import { verifyAuth } from "../middlewares/auth.middlewares";
-import { validate } from "../middlewares/validate.middlewares";
+} from "@/validations/user.validations";
+import { verifyAuth } from "@/middlewares/auth.middlewares";
+import { validate } from "@/middlewares/validate.middlewares";
 
 const userRouter = Router();
 

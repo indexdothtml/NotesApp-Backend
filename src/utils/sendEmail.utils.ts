@@ -1,6 +1,6 @@
-import { transport } from "../emailConfig";
-import { logger } from "../loggerConfig";
-import { env } from "../envConfig";
+import { transport } from "@/emailConfig";
+import { logger } from "@/loggerConfig";
+import { env } from "@/envConfig";
 
 export async function sendEmail(to: string, subject: string, body: string) {
   try {

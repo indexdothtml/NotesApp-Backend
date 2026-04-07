@@ -2,48 +2,47 @@ import jwt from "jsonwebtoken";
 import { v4 as uuidV4 } from "uuid";
 import type { Request, Response } from "express";
 
-import { asyncHandler } from "../utils/asyncHandler.utils";
-import { APIErrorResponse } from "../utils/apiErrorResponse.utils";
-import { APIResponse } from "../utils/apiResponse.utils";
-import { sendEmail } from "../utils/sendEmail.utils";
-import { cookieOptions } from "../constant";
-import { User } from "../models/user.models";
-import { Note } from "../models/note.models";
-import { env } from "../envConfig";
+import { asyncHandler } from "@/utils/asyncHandler.utils";
+import { APIErrorResponse } from "@/utils/apiErrorResponse.utils";
+import { APIResponse } from "@/utils/apiResponse.utils";
+import { sendEmail } from "@/utils/sendEmail.utils";
+import { cookieOptions } from "@/constant";
+import { User } from "@/models/user.models";
+import { Note } from "@/models/note.models";
+import { env } from "@/envConfig";
 
 // User registeration.
-const userRegister = asyncHandler(async (req: Request, res: Response) => {
-  const { fullName, email, username, password } = req.body;
+const userRegister = asyncHandler(
+  async (request: Request, response: Response) => {
+    const { name, email, password } = request.body;
 
-  // Check if user with given fields already exists.
-  const userExist = await User.findOne({ $or: [{ username }, { email }] });
+    // Check if user with given fields already exists.
+    const userExist = await User.findOne({ email });
 
-  if (userExist) {
-    return res
-      .status(409)
-      .json(
-        new APIErrorResponse(409, "User with given details is already exist."),
-      );
-  }
+    if (userExist) {
+      return response
+        .status(409)
+        .json(new APIErrorResponse(409, "Account already exist."));
+    }
 
-  // Create a new user.
-  const newUser = await User.create({
-    fullName,
-    email,
-    username,
-    password,
-  });
+    // Create a new user.
+    const newUser = await User.create({
+      name,
+      email,
+      password,
+    });
 
-  // Verify if user created.
-  const user = await User.findById(
-    newUser._id,
-    "-password -refreshToken -resetPasswordToken -resetPasswordTokenExpiry",
-  );
+    // Verify if user created.
+    const user = await User.findById(
+      newUser._id,
+      "-password -refreshToken -resetPasswordToken -resetPasswordTokenExpiry",
+    );
 
-  return res
-    .status(201)
-    .json(new APIResponse(201, "New user is created.", user));
-});
+    return response
+      .status(201)
+      .json(new APIResponse(201, "Account created successfully!", user));
+  },
+);
 
 // // User login.
 // const userLogin = asyncHandler(async (req, res) => {

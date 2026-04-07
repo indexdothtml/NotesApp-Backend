@@ -1,8 +1,8 @@
-import { connectDB } from "./db/connections.db";
-import app from "./app";
-import { env } from "./envConfig";
-import { logger } from "./loggerConfig";
-import { safeShutdown } from "./utils/safeShutdown.utils";
+import { connectDB } from "@/db/connections.db";
+import app from "@/app";
+import { env } from "@/envConfig";
+import { logger } from "@/loggerConfig";
+import { safeShutdown } from "@/utils/safeShutdown.utils";
 
 connectDB().then(() => {
   const server = app.listen(env.port, () =>

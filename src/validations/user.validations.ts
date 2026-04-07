@@ -1,12 +1,11 @@
 import Joi from "joi";
 
-import { passwordRegex } from "../constant";
+import { passwordRegex } from "@/constant";
 
 // Validation schema for user registeration input fields.
 const userRegisterValidationSchema = Joi.object({
-  fullName: Joi.string().trim().required(),
+  name: Joi.string().trim().required(),
   email: Joi.string().trim().email().required(),
-  username: Joi.string().trim().alphanum().min(3).max(30).required(),
   password: Joi.string()
     .pattern(passwordRegex)
     .messages({

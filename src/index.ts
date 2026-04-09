@@ -1,14 +1,16 @@
 import { connectDB } from "@/db/connections.db";
+import { connectRedis } from "@/redis/connections.redis";
 import app from "@/app";
 import { env } from "@/envConfig";
 import { logger } from "@/loggerConfig";
 import { safeShutdown } from "@/utils/safeShutdown.utils";
 
-connectDB().then(() => {
+const connections = Promise.all([connectDB(), connectRedis()]);
+
+connections.then(() => {
   const server = app.listen(env.port, () =>
     logger.info(`Server is listening on port ${env.port}`),
   );
-
   // Handles server starting error.
   server.on("error", async (error) => {
     logger.error(`Server listening failed with ${error}`);

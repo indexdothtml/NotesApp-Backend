@@ -10,4 +10,5 @@ export const env = {
   senderEmailAddress: process.env.SENDER_EMAIL_ADDRESS,
   senderEmailPassword: process.env.SENDER_EMAIL_PASSWORD,
   senderEmailService: process.env.SENDER_EMAIL_SERVICE,
+  redisClientURL: process.env.REDIS_CLIENT_URL,
 };

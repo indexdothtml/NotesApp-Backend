@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import {
   userRegister,
+  sendOTPForNewUserEmailVerificaiton,
   // userLogin,
   // userLogout,
   // getUser,
@@ -14,6 +15,7 @@ import {
 } from "@/controllers/user.controllers";
 import {
   userRegisterValidationSchema,
+  sendEmailVarificationOTP,
   // userLoginValidationSchema,
   // updateUserFullNameValidationSchema,
   // updateUserPasswordValidationSchema,
@@ -30,6 +32,11 @@ const userRouter = Router();
 userRouter
   .route("/register")
   .post(validate(userRegisterValidationSchema), userRegister);
+
+// Send OTP for email verification
+userRouter
+  .route("/sendVerificationOTP")
+  .post(validate(sendEmailVarificationOTP), sendOTPForNewUserEmailVerificaiton);
 
 // // User login.
 // userRouter.route("/login").post(validate(userLoginValidationSchema), userLogin);

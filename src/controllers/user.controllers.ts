@@ -6,6 +6,7 @@ import { asyncHandler } from "@/utils/asyncHandler.utils";
 import { APIErrorResponse } from "@/utils/apiErrorResponse.utils";
 import { APIResponse } from "@/utils/apiResponse.utils";
 import { sendEmail } from "@/utils/sendEmail.utils";
+import { redis } from "@/redis/connections.redis";
 import { cookieOptions } from "@/constant";
 import { User } from "@/models/user.models";
 import { Note } from "@/models/note.models";
@@ -41,6 +42,49 @@ const userRegister = asyncHandler(
     return response
       .status(201)
       .json(new APIResponse(201, "Account created successfully!", user));
+  },
+);
+
+// Send email varification otp.
+const sendOTPForNewUserEmailVerificaiton = asyncHandler(
+  async (request: Request, response: Response) => {
+    const { email } = request.body;
+
+    const userExist = await User.findOne({ email });
+
+    if (userExist) {
+      return response
+        .status(409)
+        .json(new APIErrorResponse(409, "Account already exist!"));
+    }
+
+    const otp6Digit = `${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}`;
+
+    if (!redis) {
+      return response
+        .status(500)
+        .json(new APIErrorResponse(500, "Redis client failed to connect!"));
+    }
+
+    const isEmailSent = await sendEmail(
+      email,
+      "Welcome",
+      `Your email verification OTP: ${otp6Digit}`,
+    );
+
+    if (!isEmailSent) {
+      return response
+        .status(500)
+        .json(new APIErrorResponse(500, "Failed to send otp!"));
+    }
+
+    redis.set(`otp:${email}`, otp6Digit, {
+      expiration: { type: "EX", value: 60 },
+    });
+
+    return response
+      .status(200)
+      .json(new APIResponse(200, `OTP is shared on ${email}`, null));
   },
 );
 
@@ -374,6 +418,7 @@ const userRegister = asyncHandler(
 
 export {
   userRegister,
+  sendOTPForNewUserEmailVerificaiton,
   // userLogin,
   // userLogout,
   // getUser,

@@ -1,11 +1,13 @@
 import type { Server } from "node:http";
 
 import { disconnectDB } from "@/db/connections.db";
+import { disconnectRedis } from "@/redis/connections.redis";
 import { logger } from "@/loggerConfig";
 
 export async function safeShutdown(server?: Server) {
   logger.info("Safely closing database connection and server.");
   await disconnectDB();
+  disconnectRedis();
   if (server) {
     server?.close(() => {
       logger.info("Server is stopped listening.");

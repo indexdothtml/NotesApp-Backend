@@ -8,6 +8,7 @@ import { env } from "@/envConfig";
 type User = {
   name: string;
   email: string;
+  isEmailVerified: boolean;
   password: string;
   refreshToken: string;
   resetPasswordToken: string;
@@ -34,6 +35,10 @@ const userSchema = new mongoose.Schema<UserDocument>(
       required: true,
       trim: true,
       unique: true,
+    },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
     },
     password: {
       type: String,

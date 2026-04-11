@@ -20,6 +20,12 @@ const sendEmailVarificationCodeValidationSchema = Joi.object({
   email: Joi.string().trim().email().required(),
 });
 
+// Validation schema for verify verification code.
+const verifyOTPValidationSchema = Joi.object({
+  email: Joi.string().trim().email().required(),
+  otp: Joi.string().trim().required(),
+});
+
 // Validation schema for user login input fields.
 const userLoginValidationSchema = Joi.object({
   email: Joi.string().trim().email().required(),
@@ -67,6 +73,7 @@ const resetPasswordValidationSchema = Joi.object({
 export {
   userRegisterValidationSchema,
   sendEmailVarificationCodeValidationSchema,
+  verifyOTPValidationSchema,
   userLoginValidationSchema,
   updateUserFullNameValidationSchema,
   updateUserPasswordValidationSchema,

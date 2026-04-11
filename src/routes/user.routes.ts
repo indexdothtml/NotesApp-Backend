@@ -3,6 +3,7 @@ import { Router } from "express";
 import {
   userRegister,
   sendOTPForNewUserEmailVerificaiton,
+  verifyOTP,
   // userLogin,
   // userLogout,
   // getUser,
@@ -16,6 +17,7 @@ import {
 import {
   userRegisterValidationSchema,
   sendEmailVarificationCodeValidationSchema,
+  verifyOTPValidationSchema,
   // userLoginValidationSchema,
   // updateUserFullNameValidationSchema,
   // updateUserPasswordValidationSchema,
@@ -40,6 +42,11 @@ userRouter
     validate(sendEmailVarificationCodeValidationSchema),
     sendOTPForNewUserEmailVerificaiton,
   );
+
+// Verify OTP for email verification
+userRouter
+  .route("/verifyOTP")
+  .post(validate(verifyOTPValidationSchema), verifyOTP);
 
 // // User login.
 // userRouter.route("/login").post(validate(userLoginValidationSchema), userLogin);

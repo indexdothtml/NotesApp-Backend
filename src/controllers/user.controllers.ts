@@ -17,19 +17,39 @@ const userRegister = asyncHandler(
   async (request: Request, response: Response) => {
     const { name, email, password } = request.body;
 
-    // Check if user with given fields already exists.
+    // Check if user already exist.
     const userExist = await User.findOne({ email });
 
     if (userExist) {
       return response
         .status(409)
-        .json(new APIErrorResponse(409, "Account already exist."));
+        .json(new APIErrorResponse(409, "Account already exist!"));
     }
+
+    // Check if redis is available and connection is success.
+    if (!redis) {
+      return response
+        .status(500)
+        .json(new APIErrorResponse(500, "Redis client failed to connect!"));
+    }
+
+    // Check if email is verified.
+    const isEmailVerified = await redis.get(`isVerified:${email}`);
+
+    if (!isEmailVerified || isEmailVerified === "0") {
+      return response
+        .status(401)
+        .json(new APIErrorResponse(401, "Email is not verified!"));
+    }
+
+    // Delete the cache because its used now and not required anymore.
+    await redis.del(`isVerified:${email}`);
 
     // Create a new user.
     const newUser = await User.create({
       name,
       email,
+      isEmailVerified: true,
       password,
     });
 
@@ -91,6 +111,9 @@ const sendOTPForNewUserEmailVerificaiton = asyncHandler(
       expiration: { type: "EX", value: keyExpiryInSeconds },
     });
 
+    // Set verification status
+    redis.set(`isVerified:${email}`, 0);
+
     return response.status(200).json(
       new APIResponse(200, `Verification code is shared on ${email}`, {
         expiredIn: keyExpiryInSeconds * 1000,
@@ -98,6 +121,36 @@ const sendOTPForNewUserEmailVerificaiton = asyncHandler(
     );
   },
 );
+
+// Verify user entered verification code.
+const verifyOTP = asyncHandler(async (request: Request, response: Response) => {
+  const { email, otp } = request.body;
+
+  // Check if redis is available and connection is success.
+  if (!redis) {
+    return response
+      .status(500)
+      .json(new APIErrorResponse(500, "Redis client failed to connect!"));
+  }
+
+  const cachedOTP = await redis.get(`otp:${email}`);
+
+  if (otp !== cachedOTP) {
+    return response
+      .status(401)
+      .json(new APIErrorResponse(401, "Verification code is not correct."));
+  }
+
+  await redis.del(`otp:${email}`);
+
+  await redis.set(`isVerified:${email}`, 1);
+
+  return response
+    .status(200)
+    .json(
+      new APIResponse(200, "Verification code is verified successfully.", null),
+    );
+});
 
 // // User login.
 // const userLogin = asyncHandler(async (req, res) => {
@@ -430,6 +483,7 @@ const sendOTPForNewUserEmailVerificaiton = asyncHandler(
 export {
   userRegister,
   sendOTPForNewUserEmailVerificaiton,
+  verifyOTP,
   // userLogin,
   // userLogout,
   // getUser,

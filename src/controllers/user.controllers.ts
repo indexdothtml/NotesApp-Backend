@@ -133,6 +133,7 @@ const verifyOTP = asyncHandler(async (request: Request, response: Response) => {
       .json(new APIErrorResponse(500, "Redis client failed to connect!"));
   }
 
+  // Get cached otp and check if it is correct.
   const cachedOTP = await redis.get(`otp:${email}`);
 
   if (otp !== cachedOTP) {
@@ -141,6 +142,7 @@ const verifyOTP = asyncHandler(async (request: Request, response: Response) => {
       .json(new APIErrorResponse(401, "Verification code is not correct."));
   }
 
+  // Delete otp and set isVerified true
   await redis.del(`otp:${email}`);
 
   await redis.set(`isVerified:${email}`, 1);
@@ -152,95 +154,99 @@ const verifyOTP = asyncHandler(async (request: Request, response: Response) => {
     );
 });
 
-// // User login.
-// const userLogin = asyncHandler(async (req, res) => {
-//   const { username, email, password } = req.body;
+// User login.
+const userLogin = asyncHandler(async (request: Request, response: Response) => {
+  const { email, password } = request.body;
 
-//   // Find the user with username or password.
-//   const user = await User.findOne({
-//     $or: [
-//       { username: username?.toString()?.trim() },
-//       { email: email?.toString()?.trim() },
-//     ],
-//   });
+  // Find the user with email exist.
+  const user = await User.findOne({
+    email: email?.toString()?.trim(),
+  });
 
-//   if (!user) {
-//     return res
-//       .status(404)
-//       .json(new APIErrorResponse(404, "User does not exist."));
-//   }
+  if (!user) {
+    return response
+      .status(404)
+      .json(new APIErrorResponse(404, "User does not exist."));
+  }
 
-//   // Check password.
-//   const isPasswordCorrect = await user.checkPassword(password);
+  // Check password.
+  const isPasswordCorrect = await user.checkPassword(password);
 
-//   if (!isPasswordCorrect) {
-//     return res
-//       .status(401)
-//       .json(new APIErrorResponse(401, "Incorrect credentials."));
-//   }
+  if (!isPasswordCorrect) {
+    return response
+      .status(401)
+      .json(new APIErrorResponse(401, "Password is not correct."));
+  }
 
-//   // Generate access and refresh token.
-//   const accessToken = user.generateAccessToken();
+  // Generate access and refresh token.
+  const accessToken = user.generateAccessToken();
 
-//   const refreshToken = user.generateRefreshToken();
+  const refreshToken = user.generateRefreshToken();
 
-//   // Update refreshToken in user's document.
-//   const updatedUser = await User.findByIdAndUpdate(
-//     user._id,
-//     {
-//       $set: { refreshToken },
-//     },
-//     {
-//       lean: true,
-//       new: true,
-//     },
-//   ).select(
-//     "-password -refreshToken -resetPasswordToken -resetPasswordTokenExpiry",
-//   );
+  // Update refreshToken in user's document.
+  const updatedUser = await User.findByIdAndUpdate(
+    user._id,
+    {
+      $set: { refreshToken },
+    },
+    {
+      lean: true,
+      new: true,
+    },
+  ).select(
+    "-password -refreshToken -resetPasswordToken -resetPasswordTokenExpiry",
+  );
 
-//   return res
-//     .status(200)
-//     .cookie("accessToken", accessToken, cookieOptions)
-//     .cookie("refreshToken", refreshToken, cookieOptions)
-//     .json(
-//       new APIResponse(200, "Login success.", {
-//         ...updatedUser,
-//         refreshToken,
-//         accessToken,
-//       }),
-//     );
-// });
+  return response
+    .status(200)
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
+    .json(
+      new APIResponse(200, "Login success.", {
+        ...updatedUser,
+        refreshToken,
+        accessToken,
+      }),
+    );
+});
 
-// // User logout.
-// const userLogout = asyncHandler(async (req: Request, res: Response) => {
-//   const user = req?.user;
+// User logout.
+const userLogout = asyncHandler(
+  async (request: Request, response: Response) => {
+    const user = request.user;
 
-//   await User.findByIdAndUpdate(user._id, { $set: { refreshToken: "" } });
+    // Search user and remove refreshToken.
+    await User.findByIdAndUpdate(user?._id, { $set: { refreshToken: "" } });
 
-//   return res
-//     .status(200)
-//     .clearCookie("accessToken", cookieOptions)
-//     .clearCookie("refreshToken", cookieOptions)
-//     .json(new APIResponse(200, "Logout success.", { success: true }));
-// });
+    return response
+      .status(200)
+      .clearCookie("accessToken", cookieOptions)
+      .clearCookie("refreshToken", cookieOptions)
+      .json(new APIResponse(200, "Logout success.", null));
+  },
+);
 
-// // Get User
-// const getUser = asyncHandler(async (req, res) => {
-//   const userId = req?.user?._id;
+// Get current user details
+const getCurrentUser = asyncHandler(
+  async (request: Request, response: Response) => {
+    const userId = request.user?._id;
 
-//   // Find user with id.
-//   const user = await User.findById(userId).select(
-//     "-password -refreshToken -resetPasswordToken -resetPasswordTokenExpiry",
-//   );
+    // Find user with id.
+    const user = await User.findById(userId).select(
+      "-password -refreshToken -resetPasswordToken -resetPasswordTokenExpiry",
+    );
 
-//   if (!user) {
-//     return res.status(404).json(new APIErrorResponse(404, "User not found."));
-//   }
+    if (!user) {
+      return response
+        .status(404)
+        .json(new APIErrorResponse(404, "User not found."));
+    }
 
-//   return res
-//     .status(200)
-//     .json(new APIResponse(200, "Successfully fetched user details.", user));
-// });
+    return response
+      .status(200)
+      .json(new APIResponse(200, "Successfully fetched user details.", user));
+  },
+);
 
 // // Update full name of user.
 // const updateUserFullName = asyncHandler(async (req, res) => {
@@ -484,9 +490,9 @@ export {
   userRegister,
   sendOTPForNewUserEmailVerificaiton,
   verifyOTP,
-  // userLogin,
-  // userLogout,
-  // getUser,
+  userLogin,
+  userLogout,
+  getCurrentUser,
   // updateUserFullName,
   // updateUserPassword,
   // deleteUserAccount,

@@ -4,9 +4,9 @@ import {
   userRegister,
   sendOTPForNewUserEmailVerificaiton,
   verifyOTP,
-  // userLogin,
-  // userLogout,
-  // getUser,
+  userLogin,
+  userLogout,
+  getCurrentUser,
   // updateUserFullName,
   // updateUserPassword,
   // deleteUserAccount,
@@ -18,7 +18,7 @@ import {
   userRegisterValidationSchema,
   sendEmailVarificationCodeValidationSchema,
   verifyOTPValidationSchema,
-  // userLoginValidationSchema,
+  userLoginValidationSchema,
   // updateUserFullNameValidationSchema,
   // updateUserPasswordValidationSchema,
   // deleteUserAccountValidationSchema,
@@ -48,14 +48,14 @@ userRouter
   .route("/verifyOTP")
   .post(validate(verifyOTPValidationSchema), verifyOTP);
 
-// // User login.
-// userRouter.route("/login").post(validate(userLoginValidationSchema), userLogin);
+// User login.
+userRouter.route("/login").post(validate(userLoginValidationSchema), userLogin);
 
-// // User logout.
-// userRouter.route("/logout").get(verifyAuth, userLogout);
+// User logout.
+userRouter.route("/logout").get(verifyAuth, userLogout);
 
-// // Get user details.
-// userRouter.route("/getUserDetails").get(verifyAuth, getUser);
+// Get user details.
+userRouter.route("/getCurrentUser").get(verifyAuth, getCurrentUser);
 
 // // Update user's fullname
 // userRouter

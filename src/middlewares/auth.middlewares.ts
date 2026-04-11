@@ -1,13 +1,12 @@
 import jwt from "jsonwebtoken";
-import type { Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 
 import { APIErrorResponse } from "@/utils/apiErrorResponse.utils";
 import { env } from "@/envConfig";
 import { logger } from "@/loggerConfig";
-import type { RequestWithUser, UserData } from "@/types/user.types";
 
 export function verifyAuth(
-  request: RequestWithUser,
+  request: Request,
   response: Response,
   next: NextFunction,
 ) {
@@ -39,10 +38,12 @@ export function verifyAuth(
         .json(new APIErrorResponse(500, "Something went wrong!"));
     }
 
-    const decodedPayload = jwt.verify(
+    const decodedPayload: { _id: string } = jwt.verify(
       accessToken,
       env.accessTokenSecret,
-    ) as UserData;
+    ) as {
+      _id: string;
+    };
 
     request.user = decodedPayload;
   } catch (error) {

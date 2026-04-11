@@ -50,6 +50,7 @@ const sendOTPForNewUserEmailVerificaiton = asyncHandler(
   async (request: Request, response: Response) => {
     const { email } = request.body;
 
+    // Check if user already exist.
     const userExist = await User.findOne({ email });
 
     if (userExist) {
@@ -58,33 +59,43 @@ const sendOTPForNewUserEmailVerificaiton = asyncHandler(
         .json(new APIErrorResponse(409, "Account already exist!"));
     }
 
+    // Generate 6 digits of verification code.
     const otp6Digit = `${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}`;
 
+    // Check if redis is available and connection is success.
     if (!redis) {
       return response
         .status(500)
         .json(new APIErrorResponse(500, "Redis client failed to connect!"));
     }
 
+    // Send email with verification code.
     const isEmailSent = await sendEmail(
       email,
-      "Welcome",
-      `Your email verification OTP: ${otp6Digit}`,
+      "Welcome!",
+      `Your email verification code: ${otp6Digit}`,
     );
 
+    // Check if email is sent.
     if (!isEmailSent) {
       return response
         .status(500)
         .json(new APIErrorResponse(500, "Failed to send otp!"));
     }
 
+    // Set verification code in cache memory using redis.
+    // Set verification code with 5 minutes of expiry.
+    // If verification code set again in cache it will override value and reset timer.
+    const keyExpiryInSeconds = 300;
     redis.set(`otp:${email}`, otp6Digit, {
-      expiration: { type: "EX", value: 60 },
+      expiration: { type: "EX", value: keyExpiryInSeconds },
     });
 
-    return response
-      .status(200)
-      .json(new APIResponse(200, `OTP is shared on ${email}`, null));
+    return response.status(200).json(
+      new APIResponse(200, `Verification code is shared on ${email}`, {
+        expiredIn: keyExpiryInSeconds * 1000,
+      }),
+    );
   },
 );
 

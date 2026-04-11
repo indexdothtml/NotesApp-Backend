@@ -16,7 +16,7 @@ const userRegisterValidationSchema = Joi.object({
 });
 
 // Validation schema for send email varification otp input fields.
-const sendEmailVarificationOTP = Joi.object({
+const sendEmailVarificationCodeValidationSchema = Joi.object({
   email: Joi.string().trim().email().required(),
 });
 
@@ -66,7 +66,7 @@ const resetPasswordValidationSchema = Joi.object({
 
 export {
   userRegisterValidationSchema,
-  sendEmailVarificationOTP,
+  sendEmailVarificationCodeValidationSchema,
   userLoginValidationSchema,
   updateUserFullNameValidationSchema,
   updateUserPasswordValidationSchema,

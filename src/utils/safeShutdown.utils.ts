@@ -5,7 +5,7 @@ import { disconnectRedis } from "@/redis/connections.redis";
 import { logger } from "@/loggerConfig";
 
 export async function safeShutdown(server?: Server) {
-  logger.info("Safely closing database connection and server.");
+  logger.info("Safely closing all active connections and server.");
   await disconnectDB();
   disconnectRedis();
   if (server) {

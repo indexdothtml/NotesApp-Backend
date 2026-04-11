@@ -7,8 +7,10 @@ export const env = {
   refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET,
   refreshTokenExpiry: process.env.REFRESH_TOKEN_EXPIRY,
   origin: process.env.ORIGIN,
+  emailUsername: process.env.EMAIL_USER,
+  emailPassword: process.env.EMAIL_PASS,
   senderEmailAddress: process.env.SENDER_EMAIL_ADDRESS,
-  senderEmailPassword: process.env.SENDER_EMAIL_PASSWORD,
-  senderEmailService: process.env.SENDER_EMAIL_SERVICE,
+  smtpHost: process.env.SMTP_HOST,
+  smtpPort: process.env.SMTP_PORT,
   redisClientURL: process.env.REDIS_CLIENT_URL,
 };

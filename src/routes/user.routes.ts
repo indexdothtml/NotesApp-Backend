@@ -15,7 +15,7 @@ import {
 } from "@/controllers/user.controllers";
 import {
   userRegisterValidationSchema,
-  sendEmailVarificationOTP,
+  sendEmailVarificationCodeValidationSchema,
   // userLoginValidationSchema,
   // updateUserFullNameValidationSchema,
   // updateUserPasswordValidationSchema,
@@ -35,8 +35,11 @@ userRouter
 
 // Send OTP for email verification
 userRouter
-  .route("/sendVerificationOTP")
-  .post(validate(sendEmailVarificationOTP), sendOTPForNewUserEmailVerificaiton);
+  .route("/sendEmailVerificationCode")
+  .post(
+    validate(sendEmailVarificationCodeValidationSchema),
+    sendOTPForNewUserEmailVerificaiton,
+  );
 
 // // User login.
 // userRouter.route("/login").post(validate(userLoginValidationSchema), userLogin);

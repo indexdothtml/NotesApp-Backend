@@ -1,8 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
 
-import { APIErrorResponse } from "@/utils/apiErrorResponse.utils";
+import { APIErrorResponse } from "../utils/apiErrorResponse.utils";
 
-import { logger } from "@/loggerConfig";
+import { logger } from "../loggerConfig";
 
 export function appError(
   error: Error,

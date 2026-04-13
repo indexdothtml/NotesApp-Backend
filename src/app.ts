@@ -2,8 +2,8 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
-import { corsOptions } from "@/constant";
-import { appError } from "@/middlewares/error.middlewares";
+import { corsOptions } from "./constant";
+import { appError } from "./middlewares/error.middlewares";
 
 const app = express();
 
@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes middlewares
-import userRouter from "@/routes/user.routes";
+import userRouter from "./routes/user.routes";
 // import noteRouter from "./routes/note.routes.js";
 
 // User route

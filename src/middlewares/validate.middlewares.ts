@@ -1,8 +1,8 @@
 import Joi, { type ObjectSchema } from "joi";
 import type { Request, Response, NextFunction } from "express";
 
-import { APIErrorResponse } from "@/utils/apiErrorResponse.utils";
-import { logger } from "@/loggerConfig";
+import { APIErrorResponse } from "../utils/apiErrorResponse.utils";
+import { logger } from "../loggerConfig";
 
 export function validate(schema: ObjectSchema) {
   return (request: Request, response: Response, next: NextFunction) => {

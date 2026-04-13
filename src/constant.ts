@@ -1,4 +1,4 @@
-import { env } from "@/envConfig";
+import { env } from "./envConfig";
 
 export const dbName = "notesapp";
 

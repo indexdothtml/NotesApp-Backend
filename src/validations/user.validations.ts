@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-import { passwordRegex } from "@/constant";
+import { passwordRegex } from "../constant";
 
 // Validation schema for user registeration input fields.
 const userRegisterValidationSchema = Joi.object({
@@ -32,9 +32,9 @@ const userLoginValidationSchema = Joi.object({
   password: Joi.string().required(),
 });
 
-// Validation schema for update fullname input field.
-const updateUserFullNameValidationSchema = Joi.object({
-  fullName: Joi.string().trim().required(),
+// Validation schema for update name input field.
+const updateUserNameValidationSchema = Joi.object({
+  name: Joi.string().trim().required(),
 });
 
 // Validation schema for update password input fields.
@@ -75,7 +75,7 @@ export {
   sendEmailVarificationCodeValidationSchema,
   verifyOTPValidationSchema,
   userLoginValidationSchema,
-  updateUserFullNameValidationSchema,
+  updateUserNameValidationSchema,
   updateUserPasswordValidationSchema,
   deleteUserAccountValidationSchema,
   forgotPasswordValidationSchema,

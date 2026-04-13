@@ -7,26 +7,25 @@ import {
   userLogin,
   userLogout,
   getCurrentUser,
-  // updateUserFullName,
-  // updateUserPassword,
+  updateUserName,
+  updateUserPassword,
   // deleteUserAccount,
-  // getNewAccessToken,
+  getNewAccessToken,
   // forgotPassword,
   // resetPassword,
-} from "@/controllers/user.controllers";
+} from "../controllers/user.controllers";
 import {
   userRegisterValidationSchema,
   sendEmailVarificationCodeValidationSchema,
   verifyOTPValidationSchema,
   userLoginValidationSchema,
-  // updateUserFullNameValidationSchema,
-  // updateUserPasswordValidationSchema,
+  updateUserNameValidationSchema,
+  updateUserPasswordValidationSchema,
   // deleteUserAccountValidationSchema,
-  // forgotPasswordValidationSchema,
   // resetPasswordValidationSchema,
-} from "@/validations/user.validations";
-import { verifyAuth } from "@/middlewares/auth.middlewares";
-import { validate } from "@/middlewares/validate.middlewares";
+} from "../validations/user.validations";
+import { verifyAuth } from "../middlewares/auth.middlewares";
+import { validate } from "../middlewares/validate.middlewares";
 
 const userRouter = Router();
 
@@ -57,23 +56,19 @@ userRouter.route("/logout").get(verifyAuth, userLogout);
 // Get user details.
 userRouter.route("/getCurrentUser").get(verifyAuth, getCurrentUser);
 
-// // Update user's fullname
-// userRouter
-//   .route("/updateFullName")
-//   .post(
-//     verifyAuth,
-//     validate(updateUserFullNameValidationSchema),
-//     updateUserFullName,
-//   );
+// Update user's name
+userRouter
+  .route("/updateName")
+  .post(verifyAuth, validate(updateUserNameValidationSchema), updateUserName);
 
-// // Update user's password
-// userRouter
-//   .route("/updatePassword")
-//   .post(
-//     verifyAuth,
-//     validate(updateUserPasswordValidationSchema),
-//     updateUserPassword,
-//   );
+// Update user's password
+userRouter
+  .route("/updateCurrentPassword")
+  .post(
+    verifyAuth,
+    validate(updateUserPasswordValidationSchema),
+    updateUserPassword,
+  );
 
 // // Delete user account.
 // userRouter
@@ -84,8 +79,8 @@ userRouter.route("/getCurrentUser").get(verifyAuth, getCurrentUser);
 //     deleteUserAccount,
 //   );
 
-// // Get new access token.
-// userRouter.route("/getNewAccessToken").get(getNewAccessToken);
+// Get new access token.
+userRouter.route("/getNewAccessToken").get(getNewAccessToken);
 
 // // Forgot password.
 // userRouter

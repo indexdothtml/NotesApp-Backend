@@ -1,7 +1,7 @@
-import { createClient, type RedisClientType, type RedisModules } from "redis";
+import { createClient } from "redis";
 
-import { env } from "@/envConfig";
-import { logger } from "@/loggerConfig";
+import { env } from "../envConfig";
+import { logger } from "../loggerConfig";
 
 const redisClient = createClient({ url: `${env.redisClientURL}` }).on(
   "error",

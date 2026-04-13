@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 
-import { env } from "@/envConfig";
-import { dbName } from "@/constant";
-import { logger } from "@/loggerConfig";
+import { env } from "../envConfig";
+import { dbName } from "../constant";
+import { logger } from "../loggerConfig";
 
 async function connectDB() {
   try {

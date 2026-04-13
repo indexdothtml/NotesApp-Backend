@@ -1,6 +1,6 @@
 import winston from "winston";
 
-import { env } from "@/envConfig";
+import { env } from "./envConfig";
 
 // Logger configuration
 export const logger = winston.createLogger({

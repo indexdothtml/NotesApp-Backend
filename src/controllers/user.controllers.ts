@@ -2,15 +2,16 @@ import jwt from "jsonwebtoken";
 import { v4 as uuidV4 } from "uuid";
 import type { Request, Response } from "express";
 
-import { asyncHandler } from "@/utils/asyncHandler.utils";
-import { APIErrorResponse } from "@/utils/apiErrorResponse.utils";
-import { APIResponse } from "@/utils/apiResponse.utils";
-import { sendEmail } from "@/utils/sendEmail.utils";
-import { redis } from "@/redis/connections.redis";
-import { cookieOptions } from "@/constant";
-import { User } from "@/models/user.models";
-import { Note } from "@/models/note.models";
-import { env } from "@/envConfig";
+import { asyncHandler } from "../utils/asyncHandler.utils";
+import { APIErrorResponse } from "../utils/apiErrorResponse.utils";
+import { APIResponse } from "../utils/apiResponse.utils";
+import { sendEmail } from "../utils/sendEmail.utils";
+import { redis } from "../redis/connections.redis";
+import { cookieOptions } from "../constant";
+import { User } from "../models/user.models";
+import { Note } from "../models/note.models";
+import { logger } from "../loggerConfig";
+import { env } from "../envConfig";
 
 // User registeration.
 const userRegister = asyncHandler(
@@ -248,67 +249,75 @@ const getCurrentUser = asyncHandler(
   },
 );
 
-// // Update full name of user.
-// const updateUserFullName = asyncHandler(async (req, res) => {
-//   const { fullName } = req.body;
+// Update name of user.
+const updateUserName = asyncHandler(
+  async (request: Request, response: Response) => {
+    const { name } = request.body;
 
-//   // Get user id.
-//   const userId = req?.user?._id;
+    // Get user id.
+    const userId = request.user?._id;
 
-//   // Update fullName.
-//   const updatedUser = await User.findByIdAndUpdate(
-//     userId,
-//     {
-//       $set: { fullName },
-//     },
-//     {
-//       lean: true,
-//       new: true,
-//     },
-//   ).select(
-//     "-password -refreshToken -resetPasswordToken -resetPasswordTokenExpiry",
-//   );
+    // Update fullName.
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        $set: { name },
+      },
+      {
+        lean: true,
+        new: true,
+      },
+    ).select(
+      "-password -refreshToken -resetPasswordToken -resetPasswordTokenExpiry",
+    );
 
-//   return res
-//     .status(200)
-//     .json(new APIResponse(200, "Fullname updated.", updatedUser));
-// });
+    return response
+      .status(200)
+      .json(new APIResponse(200, "User's name is updated.", updatedUser));
+  },
+);
 
-// // Update user password.
-// const updateUserPassword = asyncHandler(async (req, res) => {
-//   const { oldPassword, newPassword } = req.body;
+// Update user's password.
+const updateUserPassword = asyncHandler(
+  async (request: Request, response: Response) => {
+    const { oldPassword, newPassword } = request.body;
 
-//   // Get User id.
-//   const userId = req?.user?._id;
+    // Get User id.
+    const userId = request.user?._id;
 
-//   // Find user.
-//   const user = await User.findById(userId);
+    // Find user if exist.
+    const user = await User.findById(userId);
 
-//   // Check password.
-//   const isPasswordCorrect = await user.checkPassword(oldPassword);
+    if (!user) {
+      return response
+        .status(404)
+        .json(new APIErrorResponse(404, "User does not exist."));
+    }
 
-//   if (!isPasswordCorrect) {
-//     return res
-//       .status(401)
-//       .json(new APIErrorResponse(401, "Password is incorrect."));
-//   }
+    // Check password.
+    const isPasswordCorrect = await user.checkPassword(oldPassword);
 
-//   // Updating password.
-//   user.password = newPassword;
-//   await user.save();
+    if (!isPasswordCorrect) {
+      return response
+        .status(401)
+        .json(new APIErrorResponse(401, "Password is not correct."));
+    }
 
-//   // TODO: Send email to user.
+    // Updating password.
+    user.password = newPassword;
+    await user.save();
 
-//   return res
-//     .status(200)
-//     .json(
-//       new APIResponse(
-//         200,
-//         "Password is updated. Please logout and login again.",
-//         { success: true },
-//       ),
-//     );
-// });
+    return response
+      .status(200)
+      .json(
+        new APIResponse(
+          200,
+          "Password is updated. Please logout and login again.",
+          null,
+        ),
+      );
+  },
+);
 
 // // Delete user account.
 // const deleteUserAccount = asyncHandler(async (req, res) => {
@@ -356,102 +365,134 @@ const getCurrentUser = asyncHandler(
 //     );
 // });
 
-// // Create new access token.
-// const getNewAccessToken = asyncHandler(async (req, res) => {
-//   const refreshToken =
-//     req?.cookies?.refreshToken ||
-//     req?.headers?.authorization?.replace("Bearer ", "");
+// Create new access token.
+const getNewAccessToken = asyncHandler(
+  async (request: Request, response: Response) => {
+    const refreshToken =
+      request.cookies?.refreshToken ||
+      request.headers?.authorization?.replace("Bearer ", "");
 
-//   // Verify refresh token.
-//   if (!refreshToken) {
-//     return res
-//       .status(401)
-//       .json(
-//         new APIErrorResponse(
-//           401,
-//           "User is not authorized to perform this action. Please login again.",
-//         ),
-//       );
-//   }
+    // Verify refresh token.
+    if (!refreshToken) {
+      return response
+        .status(401)
+        .json(
+          new APIErrorResponse(
+            401,
+            "User is not authorized to perform this action. Please login again.",
+          ),
+        );
+    }
 
-//   // Validate refresh token.
-//   try {
-//     const decodedJWTValue = jwt.verify(refreshToken, env.refreshTokenSecret);
+    // Validate refresh token.
+    try {
+      // Check if refresh token loaded form env.
+      if (!env.refreshTokenSecret) {
+        logger.error(
+          "Failed to load refreshTokenSecret from environment variables.",
+        );
+        return response
+          .status(500)
+          .json(new APIErrorResponse(500, "Couldn't able to read token."));
+      }
 
-//     const userId = decodedJWTValue?._id;
+      // Get the decoded value from refresh token.
+      const decodedJWTValue = jwt.verify(
+        refreshToken,
+        env.refreshTokenSecret,
+      ) as { _id: string };
 
-//     const user = await User.findById(userId);
+      // Search user with decoded user id value from token.
+      const user = await User.findById(decodedJWTValue?._id);
 
-//     if (refreshToken !== user?.refreshToken) {
-//       return res.status(401).json(new APIErrorResponse(401, "Invalid token."));
-//     }
+      if (!user) {
+        return response
+          .status(401)
+          .json(new APIErrorResponse(401, "Token is not valid."));
+      }
 
-//     // Create new access token.
-//     const accessToken = user.generateAccessToken();
+      // Create new access token.
+      const accessToken = user.generateAccessToken();
 
-//     // Send response with new access token.
-//     return res
-//       .status(201)
-//       .cookie("accessToken", accessToken, cookieOptions)
-//       .json(new APIResponse(201, "Access token generated.", { accessToken }));
-//   } catch (error) {
-//     return res
-//       .status(401)
-//       .json(
-//         new APIErrorResponse(
-//           401,
-//           `Token verificaiton failed due to ${error}\nPlease login again.`,
-//         ),
-//       );
-//   }
-// });
+      // Send response with new access token.
+      return response
+        .status(201)
+        .cookie("accessToken", accessToken, cookieOptions)
+        .json(new APIResponse(201, "Access token generated.", { accessToken }));
+    } catch (error) {
+      return response
+        .status(401)
+        .json(
+          new APIErrorResponse(
+            401,
+            `Token verificaiton failed due to ${error}\nPlease login again.`,
+          ),
+        );
+    }
+  },
+);
 
-// // Forgot password.
-// const forgotPassword = asyncHandler(async (req, res) => {
-//   const { email } = req.body;
+// Forgot password.
+const forgotPassword = asyncHandler(
+  async (request: Request, response: Response) => {
+    const { email } = request.body;
 
-//   // Find user.
-//   const user = await User.findOne({ email });
+    // Find user.
+    const user = await User.findOne({ email });
 
-//   if (!user) {
-//     return res.status(404).json(new APIErrorResponse(404, "User not found."));
-//   }
+    if (!user) {
+      return response
+        .status(404)
+        .json(new APIErrorResponse(404, "Account does not exist."));
+    }
 
-//   // Create unique id for reset password unique token.
-//   const uniqueId = uuidV4();
+    // Create unique id for reset password unique token.
+    const uniqueId = uuidV4();
 
-//   user.resetPasswordToken = uniqueId;
+    // Check if redis is available and connection is success.
+    if (!redis) {
+      return response
+        .status(500)
+        .json(new APIErrorResponse(500, "Redis client failed to connect!"));
+    }
 
-//   // Calculate expiry time for reset password token, 15 min from current time in miliseconds.
-//   user.resetPasswordTokenExpiry = Date.now() + 15 * 60 * 1000;
+    // Save token in cache.
+    await redis.set(`passwordResetToken:${email}`, uniqueId);
 
-//   // Save details.
-//   await user.save();
+    user.resetPasswordToken = uniqueId;
 
-//   // Create reset password link.
-//   const resetPasswordLink = `${env.origin}/resetPassword/${uniqueId}`;
+    // Calculate expiry time for reset password token, 15 min from current time in miliseconds.
+    user.resetPasswordTokenExpiry = Date.now() + 15 * 60 * 1000;
 
-//   // TODO: send resetPasswordLink via email.
-//   const sendEmailResponse = await sendEmail(
-//     "abhi.kshirsagar1100@gmail.com",
-//     "Reset password",
-//     `If you have reqested to reset your password then click on the below link\n Link - ${resetPasswordLink}`,
-//   );
+    // Save details.
+    await user.save();
 
-//   if (!sendEmailResponse) {
-//     return res
-//       .status(500)
-//       .json(
-//         new APIErrorResponse(500, "Failed to send email, please try again."),
-//       );
-//   }
+    // Create reset password link.
+    const resetPasswordLink = `${env.origin}/resetPassword/${uniqueId}`;
 
-//   return res.status(200).json(
-//     new APIResponse(200, "Password reset link is shared via email.", {
-//       success: true,
-//     }),
-//   );
-// });
+    // Send resetPasswordLink via email.
+    const isEmailSent = await sendEmail(
+      email,
+      "Password reset",
+      `Your password reset link: ${resetPasswordLink}`,
+    );
+
+    if (!isEmailSent) {
+      logger.error("Failed to send password reset link.");
+      return response
+        .status(500)
+        .json(
+          new APIErrorResponse(500, "Failed to send email, please try again."),
+        );
+    }
+
+    return response
+      .status(200)
+      .json(
+        new APIResponse(200, "Password reset link is shared via email.", null),
+      );
+  },
+);
 
 // // Reset password.
 // const resetPassword = asyncHandler(async (req, res) => {
@@ -493,10 +534,10 @@ export {
   userLogin,
   userLogout,
   getCurrentUser,
-  // updateUserFullName,
-  // updateUserPassword,
+  updateUserName,
+  updateUserPassword,
   // deleteUserAccount,
-  // getNewAccessToken,
+  getNewAccessToken,
   // forgotPassword,
   // resetPassword,
 };

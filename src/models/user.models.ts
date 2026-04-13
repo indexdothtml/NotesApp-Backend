@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { StringValue } from "ms";
 
-import { env } from "@/envConfig";
+import { env } from "../envConfig";
 
 type User = {
   name: string;

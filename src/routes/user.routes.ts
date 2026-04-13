@@ -11,8 +11,8 @@ import {
   updateUserPassword,
   // deleteUserAccount,
   getNewAccessToken,
-  // forgotPassword,
-  // resetPassword,
+  forgotPassword,
+  resetPassword,
 } from "../controllers/user.controllers";
 import {
   userRegisterValidationSchema,
@@ -22,7 +22,8 @@ import {
   updateUserNameValidationSchema,
   updateUserPasswordValidationSchema,
   // deleteUserAccountValidationSchema,
-  // resetPasswordValidationSchema,
+  forgotPasswordValidationSchema,
+  resetPasswordValidationSchema,
 } from "../validations/user.validations";
 import { verifyAuth } from "../middlewares/auth.middlewares";
 import { validate } from "../middlewares/validate.middlewares";
@@ -82,14 +83,14 @@ userRouter
 // Get new access token.
 userRouter.route("/getNewAccessToken").get(getNewAccessToken);
 
-// // Forgot password.
-// userRouter
-//   .route("/forgotPassword")
-//   .post(validate(forgotPasswordValidationSchema), forgotPassword);
+// Forgot password.
+userRouter
+  .route("/forgotPassword")
+  .post(validate(forgotPasswordValidationSchema), forgotPassword);
 
-// // Reset new password.
-// userRouter
-//   .route("/resetPassword/:resetPasswordToken")
-//   .post(validate(resetPasswordValidationSchema), resetPassword);
+// Reset new password.
+userRouter
+  .route("/resetPassword/:resetPasswordToken")
+  .post(validate(resetPasswordValidationSchema), resetPassword);
 
 export default userRouter;

@@ -456,16 +456,10 @@ const forgotPassword = asyncHandler(
         .json(new APIErrorResponse(500, "Redis client failed to connect!"));
     }
 
-    // Save token in cache.
-    await redis.set(`passwordResetToken:${email}`, uniqueId);
-
-    user.resetPasswordToken = uniqueId;
-
-    // Calculate expiry time for reset password token, 15 min from current time in miliseconds.
-    user.resetPasswordTokenExpiry = Date.now() + 15 * 60 * 1000;
-
-    // Save details.
-    await user.save();
+    // Save token in cache. For 15 min = 900 seconds
+    await redis.set(`passwordResetToken:${uniqueId}`, email, {
+      expiration: { type: "EX", value: 900 },
+    });
 
     // Create reset password link.
     const resetPasswordLink = `${env.origin}/resetPassword/${uniqueId}`;
@@ -494,36 +488,50 @@ const forgotPassword = asyncHandler(
   },
 );
 
-// // Reset password.
-// const resetPassword = asyncHandler(async (req, res) => {
-//   //Get the reset token from url.
-//   const { resetPasswordToken } = req.params;
-//   const { newPassowrd } = req.body;
+// Reset password.
+const resetPassword = asyncHandler(
+  async (request: Request, response: Response) => {
+    //Get the reset token from url.
+    const { resetPasswordToken } = request.params;
+    const { password } = request.body;
 
-//   // Find user with reset token and expiry.
-//   const user = await User.findOne({
-//     resetPasswordToken,
-//     resetPasswordTokenExpiry: { $gt: Date.now() },
-//   });
+    // Check if redis is available and connection is success.
+    if (!redis) {
+      return response
+        .status(500)
+        .json(new APIErrorResponse(500, "Redis client failed to connect!"));
+    }
 
-//   if (!user) {
-//     return res
-//       .status(400)
-//       .json(new APIErrorResponse(400, "Link is not valid or expired."));
-//   }
+    // Get token from cache.
+    const email = await redis.get(`passwordResetToken:${resetPasswordToken}`);
 
-//   // Update password and clear resetPasswordToken and resetPasswordTokenExpiry.
-//   user.password = newPassowrd;
-//   user.resetPasswordToken = "";
-//   user.resetPasswordTokenExpiry = 0;
-//   await user.save();
+    if (!email) {
+      return response
+        .status(400)
+        .json(new APIErrorResponse(400, "Reset link is not valid or expired."));
+    }
 
-//   return res
-//     .status(200)
-//     .json(
-//       new APIResponse(200, "Password reset successfully.", { success: true }),
-//     );
-// });
+    // Find user with email.
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return response
+        .status(404)
+        .json(new APIErrorResponse(404, "Account does not found!"));
+    }
+
+    // Update password.
+    user.password = password;
+    await user.save();
+
+    // Delete token after use.
+    await redis.del(`passwordResetToken:${resetPasswordToken}`);
+
+    return response
+      .status(200)
+      .json(new APIResponse(200, "Password reset successfully.", null));
+  },
+);
 
 // NOTE: rate limiting.
 
@@ -538,6 +546,6 @@ export {
   updateUserPassword,
   // deleteUserAccount,
   getNewAccessToken,
-  // forgotPassword,
-  // resetPassword,
+  forgotPassword,
+  resetPassword,
 };

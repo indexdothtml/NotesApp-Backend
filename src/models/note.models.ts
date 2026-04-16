@@ -1,14 +1,27 @@
-import mongoose from "mongoose";
+import mongoose, { type Document, type Types } from "mongoose";
 
-const noteSchema = new mongoose.Schema(
+interface NoteDocument extends Document {
+  name: string;
+  userId: Types.ObjectId;
+  folderId: Types.ObjectId;
+  content: string;
+}
+
+const noteSchema = new mongoose.Schema<NoteDocument>(
   {
-    owner: {
+    name: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    title: {
-      type: String,
+    folderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "NotesFolder",
       required: true,
     },
     content: {
@@ -19,4 +32,4 @@ const noteSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-export const Note = mongoose.model("Note", noteSchema);
+export const Note = mongoose.model<NoteDocument>("Note", noteSchema);

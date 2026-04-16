@@ -10,6 +10,6 @@ export function appError(
   response: Response,
   next: NextFunction,
 ) {
-  logger.error(`Error in ${error.message}`);
+  logger.error(`Error in application ${error.message}`);
   response.status(500).json(new APIErrorResponse(500, error.message));
 }

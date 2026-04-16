@@ -2,8 +2,25 @@ import Joi from "joi";
 
 // Validation schema for add new note input fields.
 const addNewNoteValidationSchema = Joi.object({
-  title: Joi.string().trim().required(),
-  content: Joi.string().trim().required(),
+  folderId: Joi.string().required(),
+  name: Joi.string().trim().required(),
+});
+
+// Validation schema for add new note folder input fields.
+const addNewNoteFolderValidationSchema = Joi.object({
+  name: Joi.string().trim().required(),
+});
+
+// Validation schema for update note name input fields.
+const updateNameOfTheNoteValidationSchema = Joi.object({
+  noteId: Joi.string().required(),
+  name: Joi.string().trim().required(),
+});
+
+// Validation schema for update notes folder name input fields.
+const updateNotesFolderNameValidationSchema = Joi.object({
+  folderId: Joi.string().required(),
+  name: Joi.string().trim().required(),
 });
 
 // Validation schema for delete note input field.
@@ -25,6 +42,9 @@ const getNoteValidationSchema = Joi.object({
 
 export {
   addNewNoteValidationSchema,
+  addNewNoteFolderValidationSchema,
+  updateNameOfTheNoteValidationSchema,
+  updateNotesFolderNameValidationSchema,
   deleteNoteValidationSchema,
   updateNoteValidationSchema,
   getNoteValidationSchema,

@@ -5,23 +5,16 @@ import { StringValue } from "ms";
 
 import { env } from "../envConfig";
 
-type User = {
+interface UserDocument extends Document {
   name: string;
   email: string;
   isEmailVerified: boolean;
   password: string;
   refreshToken: string;
-  resetPasswordToken: string;
-  resetPasswordTokenExpiry: number;
-};
-
-type UserMethods = {
   checkPassword: (password: string) => Promise<boolean>;
   generateAccessToken: () => string;
   generateRefreshToken: () => string;
-};
-
-type UserDocument = Document & User & UserMethods;
+}
 
 const userSchema = new mongoose.Schema<UserDocument>(
   {
@@ -47,15 +40,6 @@ const userSchema = new mongoose.Schema<UserDocument>(
     refreshToken: {
       type: String,
       default: "",
-    },
-    resetPasswordToken: {
-      type: String,
-      default: "",
-    },
-    resetPasswordTokenExpiry: {
-      type: Number,
-      min: 0,
-      default: 0,
     },
   },
   { timestamps: true },

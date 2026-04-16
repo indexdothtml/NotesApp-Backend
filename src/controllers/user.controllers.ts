@@ -9,7 +9,7 @@ import { sendEmail } from "../utils/sendEmail.utils";
 import { redis } from "../redis/connections.redis";
 import { cookieOptions } from "../constant";
 import { User } from "../models/user.models";
-import { Note } from "../models/note.models";
+// import { Note } from "../models/note.models";
 import { logger } from "../loggerConfig";
 import { env } from "../envConfig";
 
@@ -108,12 +108,12 @@ const sendOTPForNewUserEmailVerificaiton = asyncHandler(
     // Set verification code with 5 minutes of expiry.
     // If verification code set again in cache it will override value and reset timer.
     const keyExpiryInSeconds = 300;
-    redis.set(`otp:${email}`, otp6Digit, {
+    await redis.set(`otp:${email}`, otp6Digit, {
       expiration: { type: "EX", value: keyExpiryInSeconds },
     });
 
     // Set verification status
-    redis.set(`isVerified:${email}`, 0);
+    await redis.set(`isVerified:${email}`, 0);
 
     return response.status(200).json(
       new APIResponse(200, `Verification code is shared on ${email}`, {

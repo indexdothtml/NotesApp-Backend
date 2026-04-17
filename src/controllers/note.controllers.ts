@@ -277,7 +277,7 @@ const getNote = asyncHandler(async (request: Request, response: Response) => {
 });
 
 // Get all user's notes.
-const getAllUserNotes = asyncHandler(
+const getAllUserNotesPreview = asyncHandler(
   async (request: Request, response: Response) => {
     // Get user id of authenticated user.
     const userId = request.user?._id;
@@ -300,10 +300,18 @@ const getAllUserNotes = asyncHandler(
         .json(new APIErrorResponse(404, "Notes not found."));
     }
 
+    const previewOfAllNotes = allNotes.map((note) => {
+      return (note.content = note.content.slice(0, 26));
+    });
+
     return response
       .status(200)
       .json(
-        new APIResponse(200, "Fetched all available user's notes.", allNotes),
+        new APIResponse(
+          200,
+          "Fetched all available user's notes.",
+          previewOfAllNotes,
+        ),
       );
   },
 );
@@ -348,6 +356,6 @@ export {
   deleteNote,
   deleteNotesFolder,
   getNote,
-  getAllUserNotes,
+  getAllUserNotesPreview,
   // updateNote,
 };

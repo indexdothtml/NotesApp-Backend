@@ -28,12 +28,10 @@ const deleteNoteValidationSchema = Joi.object({
   noteId: Joi.string().required(),
 });
 
-// Validation schema for update note input fields.
-const updateNoteValidationSchema = Joi.object({
-  noteId: Joi.string().required(),
-  newTitle: Joi.string().trim(),
-  newContent: Joi.string().trim(),
-}).or("newTitle", "newContent");
+// Validation schema for delete notes folder input field.
+const deleteNotesFolderValidationSchema = Joi.object({
+  folderId: Joi.string().required(),
+});
 
 // Validation schema for get note input field.
 const getNoteValidationSchema = Joi.object({
@@ -46,6 +44,6 @@ export {
   updateNameOfTheNoteValidationSchema,
   updateNotesFolderNameValidationSchema,
   deleteNoteValidationSchema,
-  updateNoteValidationSchema,
+  deleteNotesFolderValidationSchema,
   getNoteValidationSchema,
 };

@@ -211,24 +211,102 @@ const deleteNote = asyncHandler(
   },
 );
 
-// // Get all user's notes.
-// const getAllUserNotes = asyncHandler(async (req, res) => {
-//   // Get user id of authenticated user.
-//   const userId = req?.user?._id;
+// Delete notes folder.
+const deleteNotesFolder = asyncHandler(
+  async (request: Request, response: Response) => {
+    const { folderId } = request.body;
 
-//   if (!userId) {
-//     return res.status(404).json(new APIErrorResponse(404, "User not found!"));
-//   }
+    // Find if user exist.
+    const userId = request.user?._id;
 
-//   // Find all notes.
-//   const allNotes = await Note.find({ owner: userId });
+    const user = await User.findById(userId).exec();
 
-//   return res
-//     .status(200)
-//     .json(
-//       new APIResponse(200, "Fetched all available user's notes.", allNotes),
-//     );
-// });
+    if (!user) {
+      return response
+        .status(404)
+        .json(new APIErrorResponse(404, "User does not exist."));
+    }
+
+    // Delete folder.
+    const deletedFolder = await NotesFolder.findOneAndDelete({
+      $and: [{ _id: folderId }, { userId }],
+    }).exec();
+
+    if (!deletedFolder) {
+      logger.error("Failed to delete folder.");
+      return response
+        .status(500)
+        .json(new APIErrorResponse(500, "Failed to delete folder."));
+    }
+
+    return response
+      .status(200)
+      .json(new APIResponse(200, "Folder is deleted.", deletedFolder));
+  },
+);
+
+// Get specific note.
+const getNote = asyncHandler(async (request: Request, response: Response) => {
+  const { noteId } = request.body;
+
+  const userId = request.user?._id;
+
+  // Check if user exist.
+  const user = await User.findById(userId).exec();
+
+  if (!user) {
+    return response
+      .status(404)
+      .json(new APIErrorResponse(404, "User does not exist."));
+  }
+
+  // Find a note.
+  const note = await Note.findOne({
+    $and: [{ _id: noteId }, { userId }],
+  }).exec();
+
+  if (!note) {
+    return response
+      .status(404)
+      .json(new APIErrorResponse(404, "Note not found."));
+  }
+
+  return response
+    .status(200)
+    .json(new APIResponse(200, "Note Fetched successfully.", note));
+});
+
+// Get all user's notes.
+const getAllUserNotes = asyncHandler(
+  async (request: Request, response: Response) => {
+    // Get user id of authenticated user.
+    const userId = request.user?._id;
+
+    // Check if user exist.
+    const user = await User.findById(userId).exec();
+
+    if (!user) {
+      return response
+        .status(404)
+        .json(new APIErrorResponse(404, "User does not exist."));
+    }
+
+    // Find all notes.
+    const allNotes = await Note.find({ userId }).exec();
+
+    if (allNotes.length == 0) {
+      return response
+        .status(404)
+        .json(new APIErrorResponse(404, "Notes not found."));
+    }
+
+    return response
+      .status(200)
+      .json(
+        new APIResponse(200, "Fetched all available user's notes.", allNotes),
+      );
+  },
+);
 
 // // Update note.
 // const updateNote = asyncHandler(async (req, res) => {
@@ -262,30 +340,14 @@ const deleteNote = asyncHandler(
 //     .json(new APIResponse(200, "Note is updated.", updatedNote));
 // });
 
-// // Get single note.
-// const getNote = asyncHandler(async (req, res) => {
-//   // Get the note id from user.
-//   const { noteId } = req.body;
-
-//   // Get the note.
-//   const note = await Note.findById(noteId);
-
-//   if (!note) {
-//     return res.status(404).json(new APIErrorResponse(404, "Note not found."));
-//   }
-
-//   return res
-//     .status(200)
-//     .json(new APIResponse(200, "Fetched note successfully.", note));
-// });
-
 export {
   addNewNote,
   addNewNoteFolder,
   updateNameOfTheNote,
   updateNotesFolderName,
   deleteNote,
-  // getAllUserNotes,
+  deleteNotesFolder,
+  getNote,
+  getAllUserNotes,
   // updateNote,
-  // getNote,
 };

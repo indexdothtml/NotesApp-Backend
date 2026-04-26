@@ -282,6 +282,9 @@ const getAllUserNotesPreview = asyncHandler(
     // Get user id of authenticated user.
     const userId = request.user?._id;
 
+    // Get folder Id
+    const { folderId } = request.body;
+
     // Check if user exist.
     const user = await User.findById(userId).exec();
 
@@ -292,7 +295,7 @@ const getAllUserNotesPreview = asyncHandler(
     }
 
     // Find all notes.
-    const allNotes = await Note.find({ userId }).exec();
+    const allNotes = await Note.find({ userId, folderId }).exec();
 
     if (allNotes.length == 0) {
       return response
@@ -315,6 +318,53 @@ const getAllUserNotesPreview = asyncHandler(
       );
   },
 );
+
+// Get all folders
+const getAllFolders = asyncHandler(
+  async (request: Request, response: Response) => {
+    const userId = request.user?._id;
+
+    // Check if user exist with given id.
+    const user = await User.findById(userId).exec();
+
+    if (!user) {
+      return response
+        .status(404)
+        .json(new APIErrorResponse(404, "User does not exist."));
+    }
+
+    // Find all folders of the current user.
+    const folders = await NotesFolder.find({ userId }).exec();
+
+    if (folders.length === 0) {
+      return response
+        .status(404)
+        .json(new APIErrorResponse(404, "Folders does not exist"));
+    }
+
+    return response
+      .status(200)
+      .json(new APIResponse(200, "All available folders of the user", folders));
+  },
+);
+
+// Edit note
+const editNote = asyncHandler(async (request: Request, response: Response) => {
+  const { noteId, content } = request.body;
+
+  const note = await Note.findById(noteId).exec();
+
+  if (!note) {
+    return response
+      .status(404)
+      .json(new APIErrorResponse(404, "Note does not exist."));
+  }
+
+  note.content = content;
+  await note.save();
+
+  return response.status(200).json(new APIResponse(200, "Note updated.", note));
+});
 
 // // Update note.
 // const updateNote = asyncHandler(async (req, res) => {
@@ -357,5 +407,7 @@ export {
   deleteNotesFolder,
   getNote,
   getAllUserNotesPreview,
+  getAllFolders,
+  editNote,
   // updateNote,
 };

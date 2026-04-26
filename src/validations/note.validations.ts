@@ -38,6 +38,17 @@ const getNoteValidationSchema = Joi.object({
   noteId: Joi.string().required(),
 });
 
+// Get all notes preview of selected folder.
+const getAllUserNotesPreviewValidationSchema = Joi.object({
+  folderId: Joi.string().required(),
+});
+
+// Edit note validation schema
+const editNoteValidationSchema = Joi.object({
+  noteId: Joi.string().required(),
+  content: Joi.string().required(),
+});
+
 export {
   addNewNoteValidationSchema,
   addNewNoteFolderValidationSchema,
@@ -46,4 +57,6 @@ export {
   deleteNoteValidationSchema,
   deleteNotesFolderValidationSchema,
   getNoteValidationSchema,
+  getAllUserNotesPreviewValidationSchema,
+  editNoteValidationSchema,
 };

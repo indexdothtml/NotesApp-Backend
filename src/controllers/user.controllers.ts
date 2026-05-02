@@ -9,7 +9,6 @@ import { sendEmail } from "../utils/sendEmail.utils";
 import { redis } from "../redis/connections.redis";
 import { cookieOptions } from "../constant";
 import { User } from "../models/user.models";
-// import { Note } from "../models/note.models";
 import { logger } from "../loggerConfig";
 import { env } from "../envConfig";
 
@@ -319,52 +318,6 @@ const updateUserPassword = asyncHandler(
   },
 );
 
-// // Delete user account.
-// const deleteUserAccount = asyncHandler(async (req, res) => {
-//   const userId = req?.user?._id;
-
-//   // Get the password form user for confirmation.
-//   const { password } = req.body;
-
-//   // Find user.
-//   const user = await User.findById(userId);
-
-//   // Check password.
-//   const isPasswordCorrect = await user.checkPassword(password);
-
-//   if (!isPasswordCorrect) {
-//     return res
-//       .status(400)
-//       .json(new APIErrorResponse(400, "Password is incorrect."));
-//   }
-
-//   // Delete user.
-//   const deletedUser = await User.deleteOne({ _id: userId });
-
-//   if (deletedUser.deletedCount === 0) {
-//     return res
-//       .status(404)
-//       .json(
-//         new APIErrorResponse(
-//           404,
-//           "User deletion failed due to matching user id not found.",
-//         ),
-//       );
-//   }
-
-//   // Delete other data releated to user like notes.
-//   await Note.deleteMany({ owner: user._id });
-//   // TODO: Send email to user.
-
-//   return res
-//     .status(200)
-//     .clearCookie("accessToken", cookieOptions)
-//     .clearCookie("refreshToken", cookieOptions)
-//     .json(
-//       new APIResponse(200, "User account deleted successfully.", deletedUser),
-//     );
-// });
-
 // Create new access token.
 const getNewAccessToken = asyncHandler(
   async (request: Request, response: Response) => {
@@ -544,7 +497,6 @@ export {
   getCurrentUser,
   updateUserName,
   updateUserPassword,
-  // deleteUserAccount,
   getNewAccessToken,
   forgotPassword,
   resetPassword,

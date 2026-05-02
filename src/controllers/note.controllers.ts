@@ -366,38 +366,6 @@ const editNote = asyncHandler(async (request: Request, response: Response) => {
   return response.status(200).json(new APIResponse(200, "Note updated.", note));
 });
 
-// // Update note.
-// const updateNote = asyncHandler(async (req, res) => {
-//   // Get new title and content.
-//   const { noteId, newTitle, newContent } = req.body;
-
-//   // Create update object.
-//   const updateData = {};
-
-//   // Update title if new title is available.
-//   if (newTitle && newTitle?.toString()?.trim() !== "") {
-//     updateData.title = newTitle;
-//   }
-
-//   // Update content if new content is available.
-//   if (newContent && newContent?.toString()?.trim() !== "") {
-//     updateData.content = newContent;
-//   }
-
-//   // Update title if provided.
-//   const updatedNote = await Note.findByIdAndUpdate(
-//     noteId,
-//     {
-//       $set: updateData,
-//     },
-//     { lean: true, new: true },
-//   );
-
-//   return res
-//     .status(200)
-//     .json(new APIResponse(200, "Note is updated.", updatedNote));
-// });
-
 export {
   addNewNote,
   addNewNoteFolder,
@@ -409,5 +377,4 @@ export {
   getAllUserNotesPreview,
   getAllFolders,
   editNote,
-  // updateNote,
 };

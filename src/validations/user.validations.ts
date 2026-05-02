@@ -49,11 +49,6 @@ const updateUserPasswordValidationSchema = Joi.object({
     .required(),
 });
 
-// Validation schema for delete user input field.
-// const deleteUserAccountValidationSchema = Joi.object({
-//   password: Joi.string().required(),
-// });
-
 // Validation schema for forgot password input field.
 const forgotPasswordValidationSchema = Joi.object({
   email: Joi.string().trim().email().required(),
@@ -77,7 +72,6 @@ export {
   userLoginValidationSchema,
   updateUserNameValidationSchema,
   updateUserPasswordValidationSchema,
-  // deleteUserAccountValidationSchema,
   forgotPasswordValidationSchema,
   resetPasswordValidationSchema,
 };

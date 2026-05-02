@@ -9,7 +9,6 @@ import {
   getCurrentUser,
   updateUserName,
   updateUserPassword,
-  // deleteUserAccount,
   getNewAccessToken,
   forgotPassword,
   resetPassword,
@@ -21,7 +20,6 @@ import {
   userLoginValidationSchema,
   updateUserNameValidationSchema,
   updateUserPasswordValidationSchema,
-  // deleteUserAccountValidationSchema,
   forgotPasswordValidationSchema,
   resetPasswordValidationSchema,
 } from "../validations/user.validations";
@@ -60,25 +58,16 @@ userRouter.route("/getCurrentUser").get(verifyAuth, getCurrentUser);
 // Update user's name
 userRouter
   .route("/updateName")
-  .post(verifyAuth, validate(updateUserNameValidationSchema), updateUserName);
+  .patch(verifyAuth, validate(updateUserNameValidationSchema), updateUserName);
 
 // Update user's password
 userRouter
   .route("/updateCurrentPassword")
-  .post(
+  .patch(
     verifyAuth,
     validate(updateUserPasswordValidationSchema),
     updateUserPassword,
   );
-
-// // Delete user account.
-// userRouter
-//   .route("/deleteUserAccount")
-//   .post(
-//     verifyAuth,
-//     validate(deleteUserAccountValidationSchema),
-//     deleteUserAccount,
-//   );
 
 // Get new access token.
 userRouter.route("/getNewAccessToken").get(getNewAccessToken);
@@ -91,6 +80,6 @@ userRouter
 // Reset new password.
 userRouter
   .route("/resetPassword/:resetPasswordToken")
-  .post(validate(resetPasswordValidationSchema), resetPassword);
+  .patch(validate(resetPasswordValidationSchema), resetPassword);
 
 export default userRouter;
